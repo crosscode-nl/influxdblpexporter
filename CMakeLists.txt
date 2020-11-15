@@ -21,6 +21,7 @@ configure_file(include/${PROJECT_NAME}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/
 list(APPEND ${PROJECT_NAME}_HEADERS
         include/${PROJECT_NAME}.h
         ${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/version.h
+        include/${PROJECT_NAME}/influxdb_line_protocol_exporter.h
         )
 
 list(APPEND ${PROJECT_NAME}_SRC
@@ -28,6 +29,9 @@ list(APPEND ${PROJECT_NAME}_SRC
         )
 
 add_library(${PROJECT_NAME} ${${PROJECT_NAME}_HEADERS} ${${PROJECT_NAME}_SRC})
+
+include(cmake/influxdblptool.cmake)
+include(cmake/simple_instruments.cmake)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 

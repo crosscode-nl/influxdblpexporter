@@ -8,7 +8,7 @@ project(influxdblpexporter_tests
 list(APPEND ${PROJECT_NAME}_SRC
         main.cpp
         version_tests.cpp
-        influxdblpexporter_tests.cpp
+        influxdb_line_protocol_exporter_tests.cpp
 )
 
 list(APPEND ${PROJECT_NAME}_INCLUDE)
