@@ -29,7 +29,7 @@ TEST_SUITE("influxdb_line_protocol_exporter_tests") {
         using fake_now_metadata = cie::metadata_template<ift::point_custom_timestamp<fake_now>>;
         using fake_now_influxdb_line_protocol_exporter = cie::influxdb_line_protocol_exporter_template<line_writer, fake_now_metadata, cie::emitter<fake_now_metadata>>;
         std::stringstream ss;
-        csi::instrument_factory factory(fake_now_influxdb_line_protocol_exporter{line_writer{&ss}});
+        csi::instrument_factory factory(fake_now_influxdb_line_protocol_exporter{cie::settings{}, line_writer{&ss}});
         SUBCASE("Can create monotonic int64_t counter with measurement name: test with field_name test_field.") {
             auto mono_counter = factory.make_atomic_bidirectional_counter<int64_t>({"test","test_field"});
             SUBCASE("Output is send to ostream correctly.") {
@@ -39,7 +39,7 @@ TEST_SUITE("influxdb_line_protocol_exporter_tests") {
     }
     TEST_CASE("Can create instrument_factory with sync_influxdb_line_protocol_exporter and enabled INSERT prefix.") {
         std::stringstream ss;
-        csi::instrument_factory factory{cie::sync_influxdb_line_protocol_exporter<line_writer>(line_writer{&ss}, ift::timestamp_resolution::none, true)};
+        csi::instrument_factory factory{cie::sync_influxdb_line_protocol_exporter<line_writer>(cie::settings{ift::timestamp_resolution::none,true},line_writer{&ss})};
         SUBCASE("Can create monotonic int64_t counter with measurement name: test with field_name test_field.") {
             auto mono_counter = factory.make_atomic_bidirectional_counter<int64_t>({"test","test_field"});
             SUBCASE("Output is send to ostream correctly.") {
@@ -49,7 +49,7 @@ TEST_SUITE("influxdb_line_protocol_exporter_tests") {
     }
     TEST_CASE("Can create instrument_factory with influxdb_line_protocol_exporter and enabled INSERT prefix.") {
         std::stringstream ss;
-        csi::instrument_factory factory{cie::influxdb_line_protocol_exporter<line_writer>{line_writer{&ss}, ift::timestamp_resolution::none, true}};
+        csi::instrument_factory factory{cie::influxdb_line_protocol_exporter<line_writer>{cie::settings{ift::timestamp_resolution::none,true},line_writer{&ss}}};
         SUBCASE("Can create monotonic int64_t counter with measurement name: test with field_name test_field.") {
             auto mono_counter = factory.make_atomic_bidirectional_counter<int64_t>({"test","test_field"});
             SUBCASE("Output is send to ostream correctly.") {
@@ -59,7 +59,7 @@ TEST_SUITE("influxdb_line_protocol_exporter_tests") {
     }
     TEST_CASE("Can create instrument_factory with influxdb_line_protocol_exporter.") {
         std::stringstream ss;
-        csi::instrument_factory factory{cie::influxdb_line_protocol_exporter<line_writer>{line_writer{&ss}, ift::timestamp_resolution::none}};
+        csi::instrument_factory factory{cie::influxdb_line_protocol_exporter<line_writer>{cie::settings{ift::timestamp_resolution::none},line_writer{&ss}}};
         SUBCASE("Can create monotonic int64_t counter with measurement name: test with field_name test_field.") {
             auto mono_counter = factory.make_atomic_bidirectional_counter<int64_t>({"test","test_field"});
             REQUIRE(0==mono_counter.value());

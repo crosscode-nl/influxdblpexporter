@@ -32,6 +32,7 @@ add_library(${PROJECT_NAME} ${${PROJECT_NAME}_HEADERS} ${${PROJECT_NAME}_SRC})
 
 include(cmake/influxdblptool.cmake)
 include(cmake/simple_instruments.cmake)
+include(cmake/line_based_writers.cmake)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 

@@ -61,20 +61,26 @@ namespace crosscode::influxdblpexporter {
 
     using metadata = metadata_template<influxdblptool::point>;
 
+    struct settings {
+        influxdblptool::timestamp_resolution timestamp_resolution = influxdblptool::timestamp_resolution::nanoseconds;
+        bool insert_prefix = false;
+    };
+
     template <typename Tmetadata>
     class emitter {
         public:
         using metadata_type = Tmetadata;
         template <typename Tvalue, typename Tline_handler>
-        void write(Tvalue&& v, const metadata_type& md, Tline_handler& line_handler, influxdblptool::timestamp_resolution tsr, bool insert_prefix) const {
+        void write(Tvalue&& v, const metadata_type& md, Tline_handler& line_handler, const settings& settings) const {
             auto pt = md.make_point(std::forward<Tvalue>(v));
-            pt.set_current_timestamp_resolution(tsr);
-            if (insert_prefix) {
+            pt.set_current_timestamp_resolution(settings.timestamp_resolution);
+            if (settings.insert_prefix) {
                 pt.set_prefix(influxdblptool::insert_prefix);
             }
             line_handler.write(influxdblptool::to_string(pt));
         }
     };
+
 
     template <typename Tmetadata>
     class sync_emitter {
@@ -84,9 +90,9 @@ namespace crosscode::influxdblpexporter {
         public:
         using metadata_type = Tmetadata;
         template <typename Tvalue, typename Tline_handler>
-        void write(Tvalue&& v, const metadata_type& md, Tline_handler& lh, influxdblptool::timestamp_resolution tsr, bool insert_prefix) const {
+        void write(Tvalue&& v, const metadata_type& md, Tline_handler& lh, const settings& settings) const {
             std::lock_guard<std::mutex> lock(*mutex_);
-            nts_emit_.write(std::forward<Tvalue>(v), md, lh, tsr, insert_prefix);
+            nts_emit_.write(std::forward<Tvalue>(v), md, lh, settings);
         }
     };
 
@@ -97,27 +103,17 @@ namespace crosscode::influxdblpexporter {
     private:
         Tline_writer line_writer_;
         Temitter emitter_;
-        influxdblptool::timestamp_resolution timestamp_resolution_;
-        bool insert_prefix_;
+        settings settings_;
     public:
         influxdb_line_protocol_exporter_template(influxdb_line_protocol_exporter_template<Tline_writer,Tmetadata,Temitter>&& rhs) noexcept :
                 line_writer_{std::move(rhs.line_writer_)},
                 emitter_{std::move(rhs.emitter_)},
-                timestamp_resolution_{std::move(rhs.timestamp_resolution_)},
-                insert_prefix_{rhs.insert_prefix_} {}
+                settings_{std::move(rhs.settings_)} {}
 
-        influxdb_line_protocol_exporter_template(
-                Tline_writer line_handler,
-                influxdblptool::timestamp_resolution timestamp_resolution,
-                bool insert_prefix=false) :
-                line_writer_{std::move(line_handler)},
-                timestamp_resolution_(timestamp_resolution),
-                insert_prefix_{insert_prefix} {}
-
-        explicit influxdb_line_protocol_exporter_template(Tline_writer line_handler) :
-                line_writer_(std::move(line_handler)),
-                timestamp_resolution_(influxdblptool::timestamp_resolution::nanoseconds),
-                insert_prefix_{} {}
+        template<typename ...Args>
+        explicit influxdb_line_protocol_exporter_template(settings settings, Args... args)
+        : line_writer_{std::forward<Args>(args)...},
+          settings_{settings} {}
 
         template <typename Tvalue>
         void emit_init(Tvalue&& v, const metadata_type& md) {
@@ -128,7 +124,7 @@ namespace crosscode::influxdblpexporter {
 
         template <typename Tvalue>
         void emit(Tvalue&& v, const metadata_type& md) {
-            emitter_.write(std::forward<Tvalue>(v), md, line_writer_, timestamp_resolution_, insert_prefix_);
+            emitter_.write(std::forward<Tvalue>(v), md, line_writer_, settings_);
         }
 
     };
