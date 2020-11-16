@@ -3,6 +3,8 @@
 #include <regex>
 using namespace std::literals;
 
+using namespace crosscode::influxdblpexporter;
+
 TEST_SUITE("version") {
     TEST_CASE ("Test if version is valid semver") {
         // Regex came from: semver.org

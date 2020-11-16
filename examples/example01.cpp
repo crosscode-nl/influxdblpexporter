@@ -8,7 +8,6 @@
 int main() {
 
     using namespace crosscode::influxdblpexporter;
-    namespace ift = influxdblptool;
     using namespace std::literals;
 
     auto instrument_factory = instrument_factory_builder()

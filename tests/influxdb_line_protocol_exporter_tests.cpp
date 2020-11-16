@@ -3,7 +3,7 @@
 #include "influxdblptool.h"
 #include "simple_instruments.h"
 
-namespace ift = influxdblptool;
+namespace ift = crosscode::influxdblptool;
 namespace cie = crosscode::influxdblpexporter;
 namespace csi = crosscode::simple_instruments;
 
