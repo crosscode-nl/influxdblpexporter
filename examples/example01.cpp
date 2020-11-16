@@ -1,24 +1,34 @@
 #include <iostream>
-#include "influxdblpexporter.h"
-#include "line_based_writers.h"
-#include "simple_instruments.h"
-#include "influxdblptool.h"
 #include <thread>
+#include <influxdblpexporter/instrument_factory_builder.h>
 
-namespace cie = crosscode::influxdblpexporter;
-namespace clbw = crosscode::line_based_writers;
-namespace csi = crosscode::simple_instruments;
-namespace ift = influxdblptool;
 
-using exporter = cie::influxdb_line_protocol_exporter<clbw::segmented_line_based_file_writer>;
 
-using namespace std::literals;
 
 int main() {
-    csi::instrument_factory factory{exporter{cie::settings{},std::size_t{5},"/tmp/output_%NUM%.txt"}};
-    auto counter = factory.make_atomic_monotonic_counter<std::uint64_t>({"test","test_field",ift::tags_map{ift::tag{"tag1","tagv1"},ift::tag{"tag2","tagv2"}}});
+
+    using namespace crosscode::influxdblpexporter;
+    namespace ift = influxdblptool;
+    using namespace std::literals;
+
+    auto instrument_factory = instrument_factory_builder()
+            .with_buffer_size(5)
+            .with_file_template("/tmp/output_%NUM%.txt")
+            .build();
+
+    auto metadata = metadata_builder()
+            .with_measurement("test")
+            .with_field_key("test_field")
+            .with_tag("tag1","tagv1")
+            .with_tag("tag2","tagv2")
+            .with_field("mybooolfield",true)
+            .with_field("mytextfield","text")
+            .build();
+
+    auto counter = instrument_factory.make_atomic_monotonic_counter<std::uint64_t>(metadata);
     for (int i = 0; i<20; i++) {
         counter.add();
         std::this_thread::sleep_for(1s);
     }
 }
+

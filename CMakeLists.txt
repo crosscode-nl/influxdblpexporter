@@ -22,13 +22,17 @@ list(APPEND ${PROJECT_NAME}_HEADERS
         include/${PROJECT_NAME}.h
         ${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/version.h
         include/${PROJECT_NAME}/influxdb_line_protocol_exporter.h
+        include/${PROJECT_NAME}/instrument_factory_builder.h
+        include/${PROJECT_NAME}/metadata_builder.h
         )
 
 list(APPEND ${PROJECT_NAME}_SRC
         ${CMAKE_CURRENT_BINARY_DIR}/src/${PROJECT_NAME}/version.cpp
+        src/${PROJECT_NAME}/instrument_factory_builder.cpp
+        src/${PROJECT_NAME}/metadata_builder.cpp
         )
 
-add_library(${PROJECT_NAME} ${${PROJECT_NAME}_HEADERS} ${${PROJECT_NAME}_SRC})
+add_library(${PROJECT_NAME} ${${PROJECT_NAME}_HEADERS} ${${PROJECT_NAME}_SRC} )
 
 include(cmake/influxdblptool.cmake)
 include(cmake/simple_instruments.cmake)
