@@ -2,9 +2,6 @@
 #include <thread>
 #include <influxdblpexporter/instrument_factory_builder.h>
 
-
-
-
 int main() {
 
     using namespace crosscode::influxdblpexporter;
